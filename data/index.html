@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ESPControl UI</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+    h1 { color: #333; }
+    button { margin: 5px; padding: 10px 20px; }
+  </style>
+</head>
+<body>
+  <h1>ESPControl Dashboard</h1>
+  <div id="sensors"></div>
+  <button onclick="sendAction('reboot')">🔁 Reboot</button>
+  <script>
+    async function loadSensors() {
+      const res = await fetch('/api/sensors', {credentials: 'include'});
+      if (!res.ok) {
+        document.getElementById('sensors').innerHTML = 'Ошибка загрузки сенсоров.';
+        return;
+      }
+      const data = await res.json();
+      let html = '<ul>';
+      for (const key in data) {
+        html += `<li><b>${key}</b>: ${data[key]}</li>`;
+      }
+      html += '</ul>';
+      document.getElementById('sensors').innerHTML = html;
+    }
+
+    async function sendAction(name) {
+      const res = await fetch('/api/action', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include',
+        body: JSON.stringify({name})
+      });
+      if (res.ok) {
+        alert('Action sent: ' + name);
+        loadSensors();
+      } else {
+        alert('Ошибка отправки действия');
+      }
+    }
+
+    loadSensors();
+  </script>
+</body>
+</html>
